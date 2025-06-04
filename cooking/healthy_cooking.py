@@ -3,7 +3,7 @@ from francislib import temperature
 from francislib import sounds
 import time
 
-def check_temp(measured_temperature)
+def check_temp(measured_temperature):
     if measured_temperature >= 100:
         for i in range (5, 0, -1):
             sounds.play_sound("alarm", i)
@@ -16,5 +16,6 @@ def check_temp(measured_temperature)
 if __name__ == "__main__":
     while True:
         measured_temperature = temperature.get_temperature()
+        print(f"Measured Temperature: {measured_temperature}°C")  # Debugging output
         check_temp(measured_temperature)
         time.sleep(1)  # Check every 1 seconds

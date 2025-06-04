@@ -1,5 +1,6 @@
 from arturolib import temperature
-def manageTemp(measured_temp)
+import time
+def manageTemp(measured_temp):
     if(heat_on):
         if(measured_temp >= 25):
             heat_on = False
