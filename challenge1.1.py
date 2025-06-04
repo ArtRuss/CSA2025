@@ -25,5 +25,8 @@ while True:
     # print test
     print(alarm_state)
 
-    # use time funciton to wait a few seconds to test again
-    time.sleep(5)
+    # alarm will sound 5sec, 4sec, 3sec, 2sec, 1sec...
+    for i in range(5) # 0, 1, 2, 3, 4
+        time.sleep(5-i)
+    
+    False
