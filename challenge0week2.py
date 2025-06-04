@@ -15,26 +15,30 @@ def check_and_alarm():
     # read the temperature
     temp = temperature.get_temperature()
     
-    # if temp 100°C or above make alarm go off???
+    # if temp 100°C or above make alarm go off
     if temp >= 100:
-        #  alarm on 
-        sounds.set_alarm(True)  
+         
         # alarm will go for 5 sec
         bip_durations = [5, 4, 3, 2, 1]  # durations for each bip
         
         
         # iterate thorugh each duraction
         for duration in bip_durations:
-            print(f"Beep for {duration} second(s)")
+            #  alarm on 
+            sounds.set_alarm(True) 
+            #print(f"Beep for {duration} second(s)")
             time.sleep(duration)  # simulate bip duration
             
             
             #  alarm off after one time through
-        sounds.set_alarm(False)  
+            sounds.set_alarm(False)  
+             #print(f"Beep for {duration} second(s)")
+            time.sleep(2)  # simulate bip duration
     else:
         
         # alarm automaticaly is  off if temp is less than 100 c
         sounds.set_alarm(False)  
 
 # call function once
-check_and_alarm()
+while True:
+    check_and_alarm()
