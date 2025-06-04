@@ -10,3 +10,4 @@ while True:
             sounds.set_alarm(True)
             time.sleep(i)
             sounds.set_alarm(False)
+            time.sleep(1)
