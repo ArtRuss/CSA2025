@@ -7,7 +7,7 @@ def check_temp(measured_temperature)
     if measured_temperature >= 100:
         for i in range (5, 0, -1):
             sounds.play_sound("alarm", i)
-            time.sleep(i) //Sleeps for the duration of the sound
+            time.sleep(i) #Sleeps for the duration of the sound
             sounds.set_alarm(alarm_state=False)
             time.sleep(.5)  # Wait for half a second before next sound
     else:
@@ -16,5 +16,5 @@ def check_temp(measured_temperature)
 if __name__ == "__main__":
     while True:
         measured_temperature = temperature.get_temperature()
-        check_temp(current_temp)
+        check_temp(measured_temperature)
         time.sleep(1)  # Check every 1 seconds
