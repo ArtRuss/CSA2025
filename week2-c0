@@ -1,0 +1,11 @@
+from francislib import get_temperature
+from francislib import alarm_state
+import time 
+
+temperature = get_temperature()
+if temperature >=100:
+    for i in range(5):
+        alarm_state = True
+        time.sleep(i+1)
+else:
+    alarm_state = False
