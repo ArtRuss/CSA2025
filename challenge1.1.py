@@ -1,4 +1,3 @@
-
 from francislib import temperature, sounds, time
 
 
@@ -28,4 +27,3 @@ while True:
 
     # use time funciton to wait a few seconds to test again
     time.sleep(5)
-    False
