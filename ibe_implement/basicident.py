@@ -49,10 +49,7 @@ class BasicIdent(PublicKeyCryptosystem):
     # ------------------------------------------------------------------
     # Constructor & helpers
     # ------------------------------------------------------------------
-    def __init__(
-        self, ec, P=None, dmap=None, order=None,
-        pairing="weil", k=None, seed=None
-    ):
+    def __init__(self, ec, P=None, dmap=None, order=None,pairing="weil", k=None, seed=None):
         # Curve and subgroup generator
         self.ec = ec
         self.P = P
@@ -76,12 +73,8 @@ class BasicIdent(PublicKeyCryptosystem):
 
         # Lift curve to 𝔽_{q^k}
         self.base_ext = FiniteField(q ** self.k, 'β')
-        self.hom = Hom(
-            self.ec.base_ring(), self.base_ext
-        )(self.base_ext.gen() ** ((q ** self.k - 1) // (q - 1)))
-        self.ec_ext = EllipticCurve(
-            list(map(int, self.ec.a_invariants()))
-        ).change_ring(self.base_ext)
+        self.hom = Hom(self.ec.base_ring(), self.base_ext)(self.base_ext.gen() ** ((q ** self.k - 1) // (q - 1)))
+        self.ec_ext = EllipticCurve(list(map(int, self.ec.a_invariants()))).change_ring(self.base_ext)
 
     # ---------- helper to lift P to extension field -------------------
     def _ext(self, P):
@@ -194,14 +187,9 @@ class BasicIdent(PublicKeyCryptosystem):
         C1, C2 = ciphertext
 
         if self.pairing == "tate":
-            pair_val = self._ext(d_ID).tate_pairing(
-                self.distortion(C1), self.order,
-                self.k, self.ec_ext.base_ring().cardinality()
-            )
+            pair_val = self._ext(d_ID).tate_pairing(self.distortion(C1), self.order,self.k, self.ec_ext.base_ring().cardinality())
         else:
-            pair_val = self._ext(d_ID).weil_pairing(
-                self.distortion(C1), self.order
-            )
+            pair_val = self._ext(d_ID).weil_pairing(self.distortion(C1), self.order)
 
         # Unmask bitstring → integer
         plain_bits = [int(b) for b in C2]
@@ -251,10 +239,7 @@ def main():
     #     if n.is_prime() and n > 1000:
     #         break
 
-    ibe = BasicIdent(
-        E, P=P, dmap=simple_distortion,
-        pairing="weil", seed=42
-    )
+    ibe = BasicIdent(E, P=P, dmap=simple_distortion,pairing="weil", seed=42)
 
     print(f"[setup]  q = {q},  n = {ibe.order},  k = {ibe.k}")
     print(f"         Master secret t = {ibe.t}\n")
@@ -276,7 +261,8 @@ def main():
 
     # -- 3) Alice decrypts -------------------------------------------
     recovered = ibe.decrypt((C1, C2), d_ID, text=True)
-    print("[Alice]  Decrypted:", repr(recovered))
+    print("[Alice]  Decrypted:", repr(recovered)) 
+    #repr() function shows the string most accurately as it is written in code
 
     assert recovered == message
     print("\n✓ demo successful – plaintext recovered intact.")
