@@ -2,7 +2,7 @@
 
 import math
 
-def GoldenSpiral(max):
+def golden_spiral(max):
     seq = [1, 1]
     for i in range(2, max + 1):
         seq.append(seq[i - 2] + seq[i - 1])

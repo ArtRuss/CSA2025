@@ -2,7 +2,7 @@
 
 from arturolib import robotarm
 
-def placeThings(width, numLeft, numRight):
+def place_things(width, numLeft, numRight):
     while True:
         robotarm.pickup()
         coordinates = (0, 0)
