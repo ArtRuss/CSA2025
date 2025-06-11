@@ -15,4 +15,4 @@ def spiral_length(n):
 if __name__ == "__main__":
    n = 5
    print(f"The {n}th number in the fibonacci seequence is {fib_sequence(n)}")
-   print(f"The length of the fibonacci seequence of length {n} is {spiral_length(n)}")
+   print(f"The length of the fibonacci sequence of length {n} is {spiral_length(n)}")
