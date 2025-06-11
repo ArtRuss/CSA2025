@@ -5,7 +5,7 @@ import random
 import math
 
 # TODO: delete later
-random.seed(1)
+random.seed(10)
 
 # Functions
 
@@ -44,13 +44,19 @@ def info_gain(parent, left, right):
     gain = ent_parent - ent_weighted
     return gain
 
+def deep_copy(orig, copy):
+    for i in range(len(orig)):
+        copy[i] = orig[i]
+
 def best_split(points):
     max_gain = 0
-    left_child = []
-    right_child = []
+    best_left_child = []
+    best_right_child = []
 
     # Checks all possible x value splits
     for x in range(100):
+        left_child = []
+        right_child = []
         for point in points:
             if point[0] < x:
                 left_child.append(point)
@@ -58,13 +64,16 @@ def best_split(points):
                 right_child.append(point)
         gain = info_gain(points, left_child, right_child)
 
-        # Resets child nodes if gain is not the new maximum
-        if gain <= max_gain:
-            left_child.clear()
-            right_child.clear()
+        # Copies child lists if the current split has the best 
+        # information gain
+        if gain > max_gain:
+            deep_copy(left_child, best_left_child)
+            deep_copy(right_child, best_right_child)
 
     # Checks all possible y value splits
     for y in range(100):
+        left_child = []
+        right_child = []
         for point in points:
             if point[1] < y:
                 left_child.append(point)
@@ -72,10 +81,15 @@ def best_split(points):
                 right_child.append(point)
         gain = info_gain(points, left_child, right_child)
 
-        # Resets child nodes if gain is not the new maximum
-        if gain <= max_gain:
-            left_child.clear()
-            right_child.clear()
+        # Copies child lists if the current split has the best 
+        # information gain
+        if gain > max_gain:
+            deep_copy(left_child, best_left_child)
+            deep_copy(right_child, best_right_child)
+    
+    # TODO: add splitting info to a list, then iterate until entropy is 0 (or max gain is 0)
+
+
 
 # Main program
 points = []
