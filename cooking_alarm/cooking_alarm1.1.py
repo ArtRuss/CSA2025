@@ -1,4 +1,5 @@
-from francislib import temperature, sounds
+from temperature import get_temperature 
+from sounds import set_alarm
 import time
 
 def cooking_alarm(measure_temperature):
@@ -14,39 +15,39 @@ def cooking_alarm(measure_temperature):
 # challenge 1, turn on for 5 seconds
 while True:
 
-    # get the temperature form francislib 
-    water_temperature = temperature.get_temperature()
+    # get temperature 
+    water_temperature = get_temperature()
 
-    # call the built function to say if the alarm should sound (True) or not (False)
+    # if temperature above 100 turn on
     alarm_state = cooking_alarm(water_temperature)
 
     # if True, it will sound, if False, it wont
-    sounds.set_alarm(alarm_state)
+    set_alarm(alarm_state)
 
     # print test
-    print(alarm_state)
+    # print(alarm_state)
 
     # use time funciton to wait a few seconds to test again
     time.sleep(5)
-    False
+    # print 5 seconds to pretend its 
+
+    break
 
 # challenge 2, turn on 5,4,3,2,1
 while True:
 
-    # get the temperature form francislib 
-    water_temperature = temperature.get_temperature()
+    # get the temperature
+    water_temperature = get_temperature()
 
-    # call the built function to say if the alarm should sound (True) or not (False)
+    # if temperature 100 turn on
     alarm_state = cooking_alarm(water_temperature)
 
     # if True, it will sound, if False, it wont
-    sounds.set_alarm(alarm_state)
-
-    # print test
-    print(alarm_state)
+    set_alarm(alarm_state)
 
     # alarm will sound 5sec, 4sec, 3sec, 2sec, 1sec...
-    for i in range(5) # 0, 1, 2, 3, 4
-        time.sleep(5-i)
-    
-    False
+    if alarm_state:
+        for i in range(5): # 0, 1, 2, 3, 4
+            time.sleep(5-i)
+
+    break
