@@ -46,12 +46,14 @@ def info_gain(parent, left, right):
 
 def deep_copy(orig, copy):
     for i in range(len(orig)):
-        copy[i] = orig[i]
+        copy.append(orig[i])
 
-def best_split(points):
+def best_split(points, splits):
     max_gain = 0
     best_left_child = []
     best_right_child = []
+    split_axis = ""
+    split_num = 0
 
     # Checks all possible x value splits
     for x in range(100):
@@ -69,6 +71,8 @@ def best_split(points):
         if gain > max_gain:
             deep_copy(left_child, best_left_child)
             deep_copy(right_child, best_right_child)
+            split_axis = "x"
+            split_num = x
 
     # Checks all possible y value splits
     for y in range(100):
@@ -86,13 +90,18 @@ def best_split(points):
         if gain > max_gain:
             deep_copy(left_child, best_left_child)
             deep_copy(right_child, best_right_child)
+            split_axis = "y"
+            split_num = y
+
+    if max_gain == 0:
+        return
     
-    # TODO: add splitting info to a list, then iterate until entropy is 0 (or max gain is 0)
+    splits.append((split_axis, split_num))
 
+    best_split(left_child)
+    best_split(right_child)
 
-
-# Main program
-points = []
-random_points(20, points)
-print_points(points)
-print("Entropy of all points: " + str(entropy(points)))
+def categorize(input_pts, true_pts, false_pts):
+    splits = []
+    best_split(input_pts, splits)
+    for split in splits:
