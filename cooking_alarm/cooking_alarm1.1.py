@@ -1,6 +1,5 @@
-from francislib import temperature, sounds, time
-
-
+from francislib import temperature, sounds
+import time
 
 def cooking_alarm(measure_temperature):
     
@@ -11,6 +10,27 @@ def cooking_alarm(measure_temperature):
     
     return cooking_alarm
 
+
+# challenge 1, turn on for 5 seconds
+while True:
+
+    # get the temperature form francislib 
+    water_temperature = temperature.get_temperature()
+
+    # call the built function to say if the alarm should sound (True) or not (False)
+    alarm_state = cooking_alarm(water_temperature)
+
+    # if True, it will sound, if False, it wont
+    sounds.set_alarm(alarm_state)
+
+    # print test
+    print(alarm_state)
+
+    # use time funciton to wait a few seconds to test again
+    time.sleep(5)
+    False
+
+# challenge 2, turn on 5,4,3,2,1
 while True:
 
     # get the temperature form francislib 
