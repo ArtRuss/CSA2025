@@ -230,9 +230,18 @@ def main():
     # -- 0) System‑wide setup -----------------------------------------
     q = 10177
     E = EllipticCurve(GF(q), [0, 1])               # y² = x³ + 1
+    for _ in range(1000):
+        pt = E.random_point()
+        if pt.order().is_prime() and pt.order() > 1000:
+            P = pt
+            break
+    else: 
+        raise ValueError("No suitable point P found on E(𝔽_q)")
+    """  
     P = next(pt for pt in (E.random_point() for _ in range(500))
-             if pt.order().is_prime())
-    
+             if pt.order().is_prime() and pt.order() > 1000) 
+             #Added requirement for P to be greater than 1000
+    """
     # while True:
     #     P = EllipticCurve(GF(q), [0, 1]).random_point()
     #     n = P.order()
