@@ -16,7 +16,7 @@ from copy import deepcopy
 
 from sage.crypto.cryptosystem import PublicKeyCryptosystem
 from sage.all import (
-    EllipticCurve, Hom, Zmod, FiniteField, Integer, GF
+    EllipticCurve, Hom, Zmod, FiniteField, Integer, GF, factor
 )
 
 
@@ -56,7 +56,7 @@ class BasicIdent(PublicKeyCryptosystem):
         self.order = order or P.order()
 
         # (Weak!) RNG for demonstration purposes
-        random.seed(seed)
+        #random.seed(seed)
 
         # Distortion map handling
         self.distortion = self._decorate(dmap) if dmap else self._identity_ext
@@ -67,7 +67,6 @@ class BasicIdent(PublicKeyCryptosystem):
         # Embedding degree k
         q = self.ec.base_ring().cardinality()
         self.k = k or Zmod(self.order)(q).multiplicative_order()
-
         # Master secret t ∈ [2, n‑1]
         self.t = random.randint(2, self.order - 1)
 
@@ -230,11 +229,19 @@ def main():
     # -- 0) System‑wide setup -----------------------------------------
     q = 10177
     E = EllipticCurve(GF(q), [0, 1])               # y² = x³ + 1
-    for _ in range(1000):
+
+    N = E.cardinality()  # order of E(𝔽_q)
+    print(f"Total number of points on E(𝔽_{q}) = {N}.")
+    factors = factor(N)
+    print(f"Largest prime factor of E(𝔽_{q}) = {max(p[0] for p in factors)}") 
+
+    for _ in range(5000):
         pt = E.random_point()
-        if pt.order().is_prime() and pt.order() > 1000:
-            P = pt
-            break
+        if pt.order().is_prime():
+            if pt.order() > 5:
+                P = pt
+                print(f"Found point P of order {P.order()} on E(𝔽_{q}).")
+                break
     else: 
         raise ValueError("No suitable point P found on E(𝔽_q)")
     """  
@@ -261,16 +268,28 @@ def main():
     print("[PKG]    Issued private key for identity:", ID, "\n")
 
     # -- 2) Bob encrypts ---------------------------------------------
-    message = "The quick brown fox jumps over the lazy dog."
-    print("[Bob]    Plaintext:", repr(message))
+    #message = "The quick brown fox jumps over the lazy dog."
+    with open("sample.txt") as f:
+        message = f.read()
+    #print(message)
+    if( len(message) > 100):
+        print("Message not printed for space reasons.")
+    else:
+        print("[Bob]    Plaintext:", repr(message))
     C1, C2 = ibe.encrypt(message, pub_ID, seed=99, text=True)
     print("[Bob]    Ciphertext:")
     print("         C1 =", C1)
-    print("         C2 =", C2, "\n")
+    if(len(message) > 100):
+        print("         C2 = [omitted for space reasons]")
+    else:
+        print("         C2 =", C2, "\n")
 
     # -- 3) Alice decrypts -------------------------------------------
     recovered = ibe.decrypt((C1, C2), d_ID, text=True)
-    print("[Alice]  Decrypted:", repr(recovered)) 
+    if( len(message) > 100):
+        print("Message not printed for space reasons.")
+    else:
+        print("[Alice]  Decrypted:", repr(recovered)) 
     #repr() function shows the string most accurately as it is written in code
 
     assert recovered == message
