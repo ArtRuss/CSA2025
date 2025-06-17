@@ -12,8 +12,9 @@ Run:   sage -python basicident_demo.py
 
 import os
 import random
+import json
+from json_manager import get_json_key, decrypt_json
 from copy import deepcopy
-from json_manager import get_json_key
 from sage.crypto.cryptosystem import PublicKeyCryptosystem
 from sage.all import (
     EllipticCurve, Hom, Zmod, FiniteField, Integer, GF, factor
@@ -269,8 +270,10 @@ def main():
 
     # -- 2) Bob encrypts ---------------------------------------------
     #message = "The quick brown fox jumps over the lazy dog."
-    with open("sample.txt") as f:
-        message = f.read()
+    '''with open("sample.txt") as f:
+        message = f.read()'''
+    key_string, cipher_string, nonce_string, tag_string = get_json_key()
+    message = key_string
     #print(message)
     if( len(message) > 100):
         print("Message not printed for space reasons.")
@@ -294,6 +297,11 @@ def main():
 
     assert recovered == message
     print("\n✓ demo successful – plaintext recovered intact.")
+
+    print("\n====================================\n")
+    decrypted_data = decrypt_json(key_string, cipher_string, nonce_string, tag_string)
+    formatted_data = json.dumps(decrypted_data, indent = 2)
+    print(f"Decrypted json contents: \n{formatted_data}")
 
 
 # ----------------------------------------------------------------------
