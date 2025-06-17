@@ -7,6 +7,9 @@
         {
             "identity": "drone2@fleet.com",
             "familiar": false
+        },
+        {
+            "reputation-profile": null
         }
     ]
 }
