@@ -13,7 +13,7 @@ Run:   sage -python basicident_demo.py
 import os
 import random
 from copy import deepcopy
-
+from json_manager import get_json_key
 from sage.crypto.cryptosystem import PublicKeyCryptosystem
 from sage.all import (
     EllipticCurve, Hom, Zmod, FiniteField, Integer, GF, factor
