@@ -11,10 +11,12 @@ def on_message(client, userdata, message):
     msg = message.payload.decode()
     if msg == "intruder detected":
         logging.info("Intruder detected message received")
-        userin = input("Press A to alert authorities, or any other key to turn off alarm")
+        client.publish(config["off"], "alarm on")
+        userin = input("Press A to alert authorities, or any other key to just turn off alarm\n")
         if userin.lower() == 'a':
-            logging.info("Alerting authorities")
+            logging.info("Alerting authorities and turning off alarm")
             client.publish(config["report"], "alert authorities")
+            client.publish(config["off"], "alarm off")
         else:
             logging.info("Alarm turned off")
             client.publish(config["off"], "alarm off")

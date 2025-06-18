@@ -22,4 +22,4 @@ while True:
         # Publish message to MQTT server
         client.publish(config["report"], "intruder detected")
         logging.info("Intruder detected, message published")
-    time.sleep(1)
+    time.sleep(5) # Check every 5 seconds

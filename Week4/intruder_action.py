@@ -12,6 +12,11 @@ def on_message(client, userdata, message):
     msg = message.payload.decode()
     if msg == "alarm off":
         sounds.set_alarm(False)
+        logging.info("Alarm turned off")
+    elif msg == "alarm on":
+        sounds.set_alarm(True)
+        logging.info("Alarm turned on")
+
 # Configure logger
 logging.basicConfig(filename='intruder_detector.log', filemode='w', level=logging.INFO)
 
