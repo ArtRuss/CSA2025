@@ -1,4 +1,4 @@
-# Decision Tree Classifier
+# Decision Tree Classifier (didn't finish)
 # https://www.youtube.com/watch?v=ZVR2Way4nwQ
 
 import random
