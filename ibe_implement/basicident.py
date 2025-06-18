@@ -13,6 +13,7 @@ Run:   sage -python basicident_demo.py
 import os
 import random
 import json
+from master_secret import gen_master_secret
 from json_manager import get_json_key, decrypt_json
 from copy import deepcopy
 from sage.crypto.cryptosystem import PublicKeyCryptosystem
@@ -69,8 +70,8 @@ class BasicIdent(PublicKeyCryptosystem):
         q = self.ec.base_ring().cardinality()
         self.k = k or Zmod(self.order)(q).multiplicative_order()
         # Master secret t ∈ [2, n‑1]
-        self.t = random.randint(2, self.order - 1)
-
+        #self.t = random.randint(2, self.order - 1)
+        self.t = gen_master_secret(self.order)
         # Lift curve to 𝔽_{q^k}
         self.base_ext = FiniteField(q ** self.k, 'β')
         self.hom = Hom(self.ec.base_ring(), self.base_ext)(self.base_ext.gen() ** ((q ** self.k - 1) // (q - 1)))
