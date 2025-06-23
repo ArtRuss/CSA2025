@@ -1,0 +1,67 @@
+# Copyright (C) 2023 Gramine contributors
+# SPDX-License-Identifier: BSD-3-Clause
+
+# Python3 manifest example
+
+libos.entrypoint = "/home/kfox24/miniconda3/envs/ibe/bin/python3.11"
+
+loader.log_level = "{{ log_level }}"
+
+loader.env.LD_LIBRARY_PATH = "/lib:/lib:/home/kfox24/miniconda3/envs/ibe/lib:/home/kfox24/miniconda3/envs/ibe/lib"
+
+# Python's NumPy spawns as many threads as there are CPU cores, and each thread
+# consumes a chunk of memory, so on large machines 1G enclave size may be not enough.
+# We limit the number of spawned threads via OMP_NUM_THREADS env variable.
+loader.env.OMP_NUM_THREADS = "4"
+
+loader.insecure__use_cmdline_argv = true
+
+sys.enable_sigterm_injection = true
+
+fs.mounts = [
+  { path = "/lib", uri = "file:{{ gramine.runtimedir() }}" },
+  { path = "{{ arch_libdir }}", uri = "file:{{ arch_libdir }}" },
+  { path = "{{ arch_libdir }}", uri = "file:{{ arch_libdir }}" },
+  #MANUALLY ADDING THE PYTHON INTEPRETER'S PATH
+  { path = "/home/kfox24/miniconda3/envs/ibe/lib/python311.zip", uri = "file:/home/kfox24/miniconda3/envs/ibe/lib/python311.zip" },
+  { path = "/home/kfox24/miniconda3/envs/ibe/lib/python3.11", uri = "file:/home/kfox24/miniconda3/envs/ibe/lib/python3.11" },
+  { path = "/home/kfox24/miniconda3/envs/ibe/lib/python3.11/lib-dynload", uri = "file:/home/kfox24/miniconda3/envs/ibe/lib/python3.11/lib-dynload" },
+  { path = "/home/kfox24/miniconda3/envs/ibe/lib/python3.11/site-packages", uri = "file:/home/kfox24/miniconda3/envs/ibe/lib/python3.11/site-packages" },
+  # END PATH
+  { path = "{{ entrypoint }}", uri = "file:/home/kfox24/miniconda3/envs/ibe/bin/python3.11" },
+  { path = "basicident.py", uri = "basicident.py"},
+  { type = "tmpfs", path = "/tmp" },
+]
+
+sys.stack.size = "2M"
+sys.enable_extra_runtime_domain_names_conf = true
+
+sgx.debug = true
+sgx.edmm_enable = {{ 'true' if env.get('EDMM', '0') == '1' else 'false' }}
+sgx.enclave_size = "1G"
+sgx.max_threads = {{ '1' if env.get('EDMM', '0') == '1' else '32' }}
+
+sgx.remote_attestation = "none"
+
+sgx.trusted_files = [
+  "file:/home/kfox24/miniconda3/envs/ibe/bin/python3.11",
+  "file:{{ gramine.runtimedir() }}/",
+  "file:/lib:/lib:/home/kfox24/miniconda3/envs/ibe/lib:/home/kfox24/miniconda3/envs/ibe/lib",
+  "file:basicident.py",
+  "file:/bin/",
+  "file:/lib/",
+  "file:/lib64/",
+  "file:/usr/bin/",
+  "file:/usr/lib/",
+  "file:/usr/lib64/",
+  "file:/usr/include/",
+  "file:/usr/share/",
+  "file:/etc/",
+  "file:/dev/random",
+  "file:/dev/urandom",
+  "file:/home/kfox24/miniconda3/envs/ibe/lib/python311.zip",
+  "file:/home/kfox24/miniconda3/envs/ibe/lib/python3.11/",
+  "file:/home/kfox24/miniconda3/envs/ibe/lib/python3.11/lib-dynload/",
+  "file:/home/kfox24/miniconda3/envs/ibe/lib/python3.11/site-packages/"
+
+]
