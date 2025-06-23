@@ -3,11 +3,11 @@
 
 # Python3 manifest example
 
-libos.entrypoint = "/home/kfox24/miniconda3/envs/ibe/bin/python3.11"
+libos.entrypoint = "{{ entrypoint }}"
 
 loader.log_level = "{{ log_level }}"
 
-loader.env.LD_LIBRARY_PATH = "/lib:/lib:/home/kfox24/miniconda3/envs/ibe/lib:/home/kfox24/miniconda3/envs/ibe/lib"
+loader.env.LD_LIBRARY_PATH = "/lib:/lib:{{ arch_libdir }}:{{ arch_libdir }}"
 
 # Python's NumPy spawns as many threads as there are CPU cores, and each thread
 # consumes a chunk of memory, so on large machines 1G enclave size may be not enough.
@@ -28,7 +28,7 @@ fs.mounts = [
   { path = "/home/kfox24/miniconda3/envs/ibe/lib/python3.11/lib-dynload", uri = "file:/home/kfox24/miniconda3/envs/ibe/lib/python3.11/lib-dynload" },
   { path = "/home/kfox24/miniconda3/envs/ibe/lib/python3.11/site-packages", uri = "file:/home/kfox24/miniconda3/envs/ibe/lib/python3.11/site-packages" },
   # END PATH
-  { path = "{{ entrypoint }}", uri = "file:/home/kfox24/miniconda3/envs/ibe/bin/python3.11" },
+  { path = "{{ entrypoint }}", uri = "file:{{ entrypoint }}" },
   { path = "basicident.py", uri = "basicident.py"},
   { type = "tmpfs", path = "/tmp" },
 ]
@@ -44,9 +44,10 @@ sgx.max_threads = {{ '1' if env.get('EDMM', '0') == '1' else '32' }}
 sgx.remote_attestation = "none"
 
 sgx.trusted_files = [
-  "file:/home/kfox24/miniconda3/envs/ibe/bin/python3.11",
+  "file:{{ entrypoint }}",
   "file:{{ gramine.runtimedir() }}/",
-  "file:/lib:/lib:/home/kfox24/miniconda3/envs/ibe/lib:/home/kfox24/miniconda3/envs/ibe/lib",
+  "file:{{ arch_libdir }}/",
+  "file:{{ arch_libdir }}/",
   "file:basicident.py",
   "file:/bin/",
   "file:/lib/",
