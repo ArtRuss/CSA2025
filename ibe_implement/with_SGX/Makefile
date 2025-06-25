@@ -1,7 +1,7 @@
 # Copyright (C) 2023 Gramine contributors
 # SPDX-License-Identifier: BSD-3-Clause
 
-ARCH_LIBDIR ?= /home/kfox24/miniconda3/envs/ibe/lib
+ARCH_LIBDIR ?= /data/sage-10.6/src/bin/sage-python
 
 ifeq ($(DEBUG),1)
 GRAMINE_LOG_LEVEL = debug
@@ -20,9 +20,6 @@ RA_TYPE ?= dcap
 basicident.manifest: basicident.manifest.template
 	gramine-manifest \
 		-Dlog_level=$(GRAMINE_LOG_LEVEL) \
-		-Darch_libdir=$(ARCH_LIBDIR) \
-		-Dentrypoint=$(realpath $(shell which python)) \
-		-Dra_type=$(RA_TYPE) \
 		basicident.manifest.template > basicident.manifest
 
 basicident.manifest.sgx basicident.sig : basicident.manifest
@@ -32,7 +29,7 @@ basicident.manifest.sgx basicident.sig : basicident.manifest
 
 .PHONY:	run-direct
 run-direct:
-	gramine-direct basicident /home/kfox24/miniconda3/envs/ibe/bin/python3.11 basicident.py
+	gramine-direct basicident /app.py
 
 .PHONY: clean
 clean:
