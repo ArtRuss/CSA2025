@@ -1,6 +1,6 @@
 import math
 
-class Fraction():
+class Fraction:
     def simplify(self):
         gcd = math.gcd(self.numerator, self.denominator)
         self.numerator //= gcd
