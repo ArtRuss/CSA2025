@@ -44,9 +44,11 @@ class Fraction:
     def __str__(self):
         return f"{self.numerator} / {self.denominator}"
 
-    
-fraction1 = Fraction(1,2)
-fraction2 = Fraction(1,4)
+fraction1_input = input("Whats the numerator and denominator (enter a list): ").split()
+fraction2_input = input ("Whats the second numerator and denominator (enter a list): ").split()
+
+fraction1 = Fraction(int(fraction1_input[0]), int(fraction1_input[1]))
+fraction2 = Fraction(int(fraction2_input[0]), int(fraction2_input[1]))
 fraction3 = fraction1 + fraction2
 print(fraction3)
 
