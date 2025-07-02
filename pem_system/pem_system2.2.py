@@ -24,4 +24,3 @@ for i in range(len(stack_temperature)):
     heat_state, cool_state = pem_system(get_temperature)
     set_heat(i, heat_state)
     set_cool(i, cool_state)
-    
