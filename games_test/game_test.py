@@ -21,9 +21,9 @@ while running:
             running = False
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_RIGHT:
-                player_x += 5
+                player_x += 10
             if event.key == pygame.K_LEFT:
-                player_x -= 5
+                player_x -= 10
     
     screen.fill((0,0,0))
     pygame.draw.rect(screen, (0,255,0), (player_x,player_y,50,50))
