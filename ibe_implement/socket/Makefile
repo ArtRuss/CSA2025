@@ -1,4 +1,3 @@
-
 PY_SCRIPT := basicident.py
 SAGE_DIR := /data/sage
 MANIFEST := basicident.manifest
@@ -10,7 +9,7 @@ SGX_SIGNED_MANIFEST := $(MANIFEST).sgx
 SIGNER_KEY := /home/kfox24/.config/gramine/enclave-key.pem
 RA_TYPE ?= none
 
-.PHONY: all direct sgx clean
+.PHONY: all direct sgx clean run-setup run-encrypt run-decrypt run-all
 all:
 ifeq ($(SGX),1)
 	@$(MAKE) sgx
@@ -34,6 +33,17 @@ $(SGX_SIGNED_MANIFEST): $(MANIFEST)
 	--key $(SIGNER_KEY) \
 	--manifest $< \
 	--output $@
+
+run-setup:
+	gramine-sgx basicident setup
+
+run-encrypt:
+	/data/sage/venv/bin/python3 basicident.py encrypt
+
+run-decrypt:
+	/data/sage/venv/bin/python3 basicident.py decrypt
+
+run-all: run-setup run-encrypt run-decrypt
 
 clean:
 	rm -f $(MANIFEST) $(MANIFEST).sgx *.sig

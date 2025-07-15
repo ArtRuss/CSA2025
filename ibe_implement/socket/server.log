@@ -1,0 +1,4 @@
+INFO:kga_server:[LISTENING] on server 129.74.154.215
+INFO:kga_server:[NEW CONNECTION] ('129.74.154.215', 39662) connected
+INFO:kga_server:[ACTIVE CLIENTS] 1
+INFO:kga_server:[CONTEXT RECEIVED] {'identity': 'kf', 'is_sending': 1, 'destination': 'hfgh', 'message': 'fhdh'}

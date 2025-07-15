@@ -19,13 +19,10 @@ import json
 import sys
 #from master_secret import gen_master_secret
 #from json_manager import get_json_key, decrypt_json
+import kga_server as server
 from copy import deepcopy
 from sage.crypto.cryptosystem import PublicKeyCryptosystem
-from sage.all import (
-    EllipticCurve, Hom, Zmod, FiniteField, Integer, GF, factor
-)
-
-
+from sage.all import (EllipticCurve, Hom, Zmod, FiniteField, Integer, GF, factor)
 
 # ----------------------------------------------------------------------
 # 1.  Boneh–Franklin BasicIdent class
@@ -76,7 +73,7 @@ class BasicIdent(PublicKeyCryptosystem):
         self.k = k or Zmod(self.order)(q).multiplicative_order()
         
         # Master secret t ∈ [2, n‑1]
-        self.t = random.randint(2, self.order - 1)
+        self.t = Integer(random.randint(2, self.order - 1))
         #self.t = gen_master_secret(self.order)
         
         # Lift curve to 𝔽_{q^k}
@@ -115,34 +112,9 @@ class BasicIdent(PublicKeyCryptosystem):
     def gen_P_pub(self):
         return self.t * self.P
 
-    def private_key(self, identity):
+    def private_key(self, identity, order, P):
         """Return d_ID = t · Q_ID (only PKG can compute)."""
-        return self.t * self.H1(identity)
-
-    # ------------------------------------------------------------------
-    # Encryption / decryption
-    # ------------------------------------------------------------------
-    
-
-    # ------------------------------------------------------------------
-    def decrypt(self, ciphertext, d_ID, *, text=False):
-        """Recover message using private key d_ID."""
-        C1, C2 = ciphertext
-
-        if self.pairing == "tate":
-            pair_val = self._ext(d_ID).tate_pairing(self.distortion(C1), self.order,self.k, self.ec_ext.base_ring().cardinality())
-        else:
-            pair_val = self._ext(d_ID).weil_pairing(self.distortion(C1), self.order)
-
-        # Unmask bitstring → integer
-        plain_bits = [int(b) for b in C2]
-        m_int = int(self._mask(plain_bits, pair_val), 2)
-
-        if text:
-            m_len = (m_int.bit_length() + 7) // 8
-            return m_int.to_bytes(m_len, 'big').decode()
-        return m_int
-
+        return self.t * H1(identity, order, P)
 
 # ----------------------------------------------------------------------
 # 2.  Minimal distortion map for a supersingular curve
@@ -197,7 +169,6 @@ def encrypt(message, pub_ID, order, P, Q_ID, *, seed=None, text=False):
         r = random.randint(2, order - 1)
 
         # 3) Pairing computation
-        Q_ID, tP = pubkey
 
         pair_val = Q_ID.weil_pairing(simple_distortion(pub_ID), order)
 
@@ -205,6 +176,21 @@ def encrypt(message, pub_ID, order, P, Q_ID, *, seed=None, text=False):
         C1 = r * P
         C2 = _mask(msg_bits, pair_val ** r)
         return C1, C2
+
+def decrypt(ciphertext, d_ID, order, *, text=False):
+        """Recover message using private key d_ID."""
+        C1, C2 = ciphertext
+        
+        pair_val = d_ID.weil_pairing(simple_distortion(C1), order)
+
+        # Unmask bitstring → integer
+        plain_bits = [int(b) for b in C2]
+        m_int = int(_mask(plain_bits, pair_val), 2)
+
+        if text:
+            m_len = (m_int.bit_length() + 7) // 8
+            return m_int.to_bytes(m_len, 'big').decode()
+        return m_int
 
 def H1(identity, order, P):
         """
@@ -227,109 +213,144 @@ def save_to_json(fileName, content):
         else:
             raise ValueError("Data is not serializable")
 
-def write_file(path, d_ID):
+def write_file(path, data):
     with open(path, "w") as f:
-        if is_serializable(d_ID):
-            json.dump(d_ID, f)
+        if is_serializable(data):
+            json.dump(data, f, indent=2)
         else:
             raise ValueError("Data is not serializable")
 
 def is_serializable(data):
     try:
         json.dumps(data)
-        return true
+        return True
     except (TypeError, OverflowError):
-        return false
+        return False
+
+def handle_context(context, ibe, E):
+    personal_data = {
+        "private_key": None,
+        "public_key": None
+    }
+    if context["is_sending"]: #Needs to encrypt
+        ID = context["destination"]
+        P = ibe.P
+        pub_ID = ibe.gen_P_pub() #COMPUTES tP
+        pub_ID_serial = {"x": int(pub_ID[0]), "y": int(pub_ID[1])}
+            
+        P_serial = {"x": int(P[0]), "y": int(P[1])}
+        #print("[PKG]    Issued private key for identity:", ID, "\n")
+
+        '''system_params = {
+            "ID": ID,
+            "P_pub": pub_ID_serial, 
+            "P": P_serial, 
+            "Order": int(ibe.order)
+        }'''
+        Q_ID = H1(ID, ibe.order, ibe.P)
+        C1, C2 = encrypt(context["message"], pub_ID, ibe.order, P, Q_ID, seed=99, text=True)
+        '''Only if cipher is written to a file
+        ciphertext = {
+            "C1": {"x": int(C1[0]), "y": int(C1[1])},  #Will later need to do E(C1) to recover the EC point that it represents
+            "C2": C2,
+            "Message": message
+        }'''
+        print(f"C1: {C1} \nC2: {C2}")
+    return personal_data
+def for_later():
+    
+        
+    if context["incoming_msg"]: #Needs to decrypt
+        ID = context["identity"]
+        d_ID = ibe.private_key(ID, ibe.order, ibe.P) #COMPUTES tQ
+        d_ID_serial = {"x": int(d_ID[0]), "y": int(d_ID[1])}
+        return None
+    
 
 # ----------------------------------------------------------------------
 # 3.  Self‑contained demo
 # ----------------------------------------------------------------------
 def main():
-    if argv[1] == "setup":
+    '''if sys.argv[1] == "setup":
         mode = 1
-    elif argv[1] == "encrypt":
+    elif sys.argv[1] == "encrypt":
         mode = 2
-    else:
+    elif sys.argv[1] == "decrypt":
         mode = 3
-    ''' IF IN ENCRYPT MODE, THERE ARE NO SECRETS THAT NEED TO BE KEPT'''
+    else:
+        raise Exception("Enter a valid command line argument")
+    '''
+    mode = 1
 
+    
 
+# -- 0) System‑wide setup -----------------------------------------
+#SETUP MODE TO BE RUN INSIDE SGX
     print("\n╔═══════════════════════════════════════════════════════╗")
-    print("║  Boneh–Franklin BasicIdent demo (Python 3 + Sage)     ║")
-    print("╚═══════════════════════════════════════════════════════╝\n")
+    print("║                   KGA SERVER PROTOTYPE                ║")
+    print("╚═══════════════════════════════════════════════════════╝")
+    
+    print("Generating the succeptible data (master secret)")
+    q = 10177
+    E = EllipticCurve(GF(q), [0, 1])               # y² = x³ + 1
 
-    # -- 0) System‑wide setup -----------------------------------------
-    if mode == 1: #SETUP MODE TO BE RUN INSIDE SGX
-        q = 10177
-        E = EllipticCurve(GF(q), [0, 1])               # y² = x³ + 1
+    N = E.cardinality()  # order of E(𝔽_q)
+    #print(f"Total number of points on E(𝔽_{q}) = {N}.")
+    #factors = factor(N)
+    #print(f"Largest prime factor of E(𝔽_{q}) = {max(p[0] for p in factors)}") 
 
-        N = E.cardinality()  # order of E(𝔽_q)
-        print(f"Total number of points on E(𝔽_{q}) = {N}.")
-        factors = factor(N)
-        print(f"Largest prime factor of E(𝔽_{q}) = {max(p[0] for p in factors)}") 
+    for _ in range(5000):
+        pt = E.random_point()
+        if pt.order().is_prime():
+            if pt.order() > 5:
+                P = pt
+                #print(f"Found point P of order {P.order()} on E(𝔽_{q}).")
+                break
+    else: 
+        raise ValueError("No suitable point P found on E(𝔽_q)")
+    """  
+    P = next(pt for pt in (E.random_point() for _ in range(500))
+            if pt.order().is_prime() and pt.order() > 1000) 
+            #Added requirement for P to be greater than 1000
+    """
+    # while True:
+    #     P = EllipticCurve(GF(q), [0, 1]).random_point()
+    #     n = P.order()
+    #     if n.is_prime() and n > 1000:
+    #         break
 
-        for _ in range(5000):
-            pt = E.random_point()
-            if pt.order().is_prime():
-                if pt.order() > 5:
-                    P = pt
-                    #print(f"Found point P of order {P.order()} on E(𝔽_{q}).")
-                    break
-        else: 
-            raise ValueError("No suitable point P found on E(𝔽_q)")
-        """  
-        P = next(pt for pt in (E.random_point() for _ in range(500))
-                if pt.order().is_prime() and pt.order() > 1000) 
-                #Added requirement for P to be greater than 1000
-        """
-        # while True:
-        #     P = EllipticCurve(GF(q), [0, 1]).random_point()
-        #     n = P.order()
-        #     if n.is_prime() and n > 1000:
-        #         break
-
-        ibe = BasicIdent(E, P=P, dmap=simple_distortion,pairing="weil", seed=42)
-
-        print(f"[setup]  q = {q},  n = {ibe.order},  k = {ibe.k}")
-        print(f"         Master secret t = {ibe.t}\n")
-
-        # -- 1) Key extraction for Alice ----------------------------------
-        ID = "alice@example.com"
-        d_ID = ibe.private_key(ID) #COMPUTES tQ
-        pub_ID = ibe.gen_P_pub(ID) #COMPUTES tP
+    ibe = BasicIdent(E, P=P, dmap=simple_distortion,pairing="weil", seed=42)
+    print(f"[setup]  q = {q},  n = {ibe.order},  k = {ibe.k}")
+    print(f"         Master secret t = {ibe.t}\n")
+    print("Starting the server -- Check server.log for info")
+    server.main(ibe, E)
+    
+    # -- 1) Key extraction for Alice ----------------------------------
         
-        print("[PKG]    Issued private key for identity:", ID, "\n")
 
-        save_to_json("system_params.json", {"ID": ID, "P_pub": pub_ID, "P": ibe.P, "Order": ibe.order})
-        write_file("/tmp/private_key.json", d_ID)
 
-    elif mode == 2: #Encryption Mode
+    if mode == 2: #Encryption Mode
+        print("Mode - Encrypt")
+        q = 10177
+        E = EllipticCurve(GF(q), [0, 1])  #Same curve as before
+        
+        print("Outside of SGX\n---------\nExtracting data from system_params.json")
         with open("system_params.json") as f:
             params = json.load(f)
 
         order = params["Order"]
-        P = params["P"]
+        P_serial = params["P"]
+        P = E(P_serial["x"], P_serial["y"])
         identity = params["ID"]
-        pub_ID = params["P_pub"]
+        pub_ID_serial = params["P_pub"]
+        pub_ID = E(pub_ID_serial["x"], pub_ID_serial["y"])
+
 
         Q_ID = H1(identity, order, P)
-        # -- 2) Bob encrypts ---------------------------------------------
-        message = "The quick brown fox jumps over the lazy dog."
-        ''' FOR TEXT FILES
-            with open("sample.txt") as f:
-            message = f.read()
-            if( len(message) > 100):
-            print("Message not printed for space reasons.")
-        else:
-            print("[Bob]    Plaintext:", repr(message))
-        '''
-        #====================================
-        ''' FOR JSON FILES 
-            key_string, cipher_string, nonce_string, tag_string = get_json_key()
-        message = key_string
-        print(message) 
-        '''
-        C1, C2 = encrypt(message, pub_ID, order, P, Q_ID, seed=99, text=True)
+        # -- 2) Bob encrypts --
+        
+        write_file("ciphertext.json", ciphertext) 
+
         print("[Bob]    Ciphertext:")
         print("         C1 =", C1)
         if(len(message) > 100):
@@ -337,9 +358,34 @@ def main():
         else:
             print("         C2 =", C2, "\n")
 
-    else: # DECRYPTION MODE
-        # -- 3) Alice decrypts -------------------------------------------
-        recovered = ibe.decrypt((C1, C2), d_ID, text=True)
+
+
+    if mode == 3: # DECRYPTION MODE
+        print("Mode - Decrypt")
+        q = 10177
+        E = EllipticCurve(GF(q), [0, 1])  #Same curve as before
+
+        print("Outside of SGX\n---------\nExtracting data from ciphertext.json")
+        with open("ciphertext.json") as f:
+            contents = json.load(f)
+        #De-serializing the C1 ciphertext
+        C1_coords = contents["C1"]
+        C1 = E((C1_coords["x"], C1_coords["y"]))
+        C2 = contents["C2"]
+        message = contents["Message"]
+
+        print("Outside of SGX\n---------\nExtracting data from private_key.json")
+        with open("output/private_key.json") as f:
+            content = json.load(f)
+        d_ID_serial = content["d_ID"]
+        d_ID = E((d_ID_serial["x"], d_ID_serial["y"]))
+
+        print("Outside of SGX\n---------\nExtracting data from system_params.json")
+        with open("system_params.json") as f:
+            params = json.load(f)
+        order = params["Order"]
+
+        recovered = decrypt((C1, C2), d_ID, order, text=True)
         if( len(message) > 100):
             print("Message not printed for space reasons.")
         else:
