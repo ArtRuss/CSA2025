@@ -12,4 +12,3 @@ To run the NASA drone implement, 3 terminal tabs are needed
 *sage -python kga_server.py*
 *sage -python sam_server.py*
 *sage -python drone_client.py*
-

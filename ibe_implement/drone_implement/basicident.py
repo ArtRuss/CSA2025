@@ -235,10 +235,6 @@ def handle_context(context, ibe, E):
         print(f"C1: {C1} \nC2: {C2}")
     return personal_data
 
-    
-def encrypt_apar(apar):
-    pass
-
 def gen_global_params():
     q = 10177
     E = EllipticCurve(GF(q), [0, 1])               # y² = x³ + 1
@@ -251,9 +247,9 @@ def gen_global_params():
             if pt.order() > 5:
                 P = pt
                 break
-    else: 
+    else:
         raise ValueError("No suitable point P found on E(𝔽_q)")
-    """  
+    """
     P = next(pt for pt in (E.random_point() for _ in range(500))
             if pt.order().is_prime() and pt.order() > 1000) 
             #Added requirement for P to be greater than 1000
@@ -267,112 +263,3 @@ def gen_global_params():
     return BasicIdent(E, P=P, dmap=simple_distortion,pairing="weil", seed=42)
 def gen_EC(q, a, b):
     return EllipticCurve(GF(q), [a, b])# ----------------------------------------------------------------------
-# 3.  Self‑contained demo
-# ----------------------------------------------------------------------
-def main():
-    '''if sys.argv[1] == "setup":
-        mode = 1
-    elif sys.argv[1] == "encrypt":
-        mode = 2
-    elif sys.argv[1] == "decrypt":
-        mode = 3
-    else:
-        raise Exception("Enter a valid command line argument")
-    '''
-    mode = 1
-
-
-# -- 0) System‑wide setup -----------------------------------------
-#SETUP MODE TO BE RUN INSIDE SGX
-    print("\n╔═══════════════════════════════════════════════════════╗")
-    print("║                   KGA SERVER PROTOTYPE                ║")
-    print("╚═══════════════════════════════════════════════════════╝")
-    
-    print("Generating the succeptible data (master secret)")
-    
-    print(f"[setup]  q = {q},  n = {ibe.order},  k = {ibe.k}")
-    print(f"         Master secret t = {ibe.t}\n")
-    print("Starting the server -- Check server.log for info")
-    server.main(ibe, E)
-    
-    # -- 1) Key extraction for Alice ----------------------------------
-        
-
-
-    if mode == 2: #Encryption Mode
-        print("Mode - Encrypt")
-        q = 10177
-        E = EllipticCurve(GF(q), [0, 1])  #Same curve as before
-        
-        print("Outside of SGX\n---------\nExtracting data from system_params.json")
-        with open("system_params.json") as f:
-            params = json.load(f)
-
-        order = params["Order"]
-        P_serial = params["P"]
-        P = E(P_serial["x"], P_serial["y"])
-        identity = params["ID"]
-        pub_ID_serial = params["P_pub"]
-        pub_ID = E(pub_ID_serial["x"], pub_ID_serial["y"])
-
-
-        Q_ID = H1(identity, order, P)
-        # -- 2) Bob encrypts --
-        
-        write_file("ciphertext.json", ciphertext) 
-
-        print("[Bob]    Ciphertext:")
-        print("         C1 =", C1)
-        if(len(message) > 100):
-            print("         C2 = [omitted for space reasons]")
-        else:
-            print("         C2 =", C2, "\n")
-
-
-
-    if mode == 3: # DECRYPTION MODE
-        print("Mode - Decrypt")
-        q = 10177
-        E = EllipticCurve(GF(q), [0, 1])  #Same curve as before
-
-        print("Outside of SGX\n---------\nExtracting data from ciphertext.json")
-        with open("ciphertext.json") as f:
-            contents = json.load(f)
-        #De-serializing the C1 ciphertext
-        C1_coords = contents["C1"]
-        C1 = E((C1_coords["x"], C1_coords["y"]))
-        C2 = contents["C2"]
-        message = contents["Message"]
-
-        print("Outside of SGX\n---------\nExtracting data from private_key.json")
-        with open("output/private_key.json") as f:
-            content = json.load(f)
-        d_ID_serial = content["d_ID"]
-        d_ID = E((d_ID_serial["x"], d_ID_serial["y"]))
-
-        print("Outside of SGX\n---------\nExtracting data from system_params.json")
-        with open("system_params.json") as f:
-            params = json.load(f)
-        order = params["Order"]
-
-        recovered = decrypt((C1, C2), d_ID, order, text=True)
-        if( len(message) > 100):
-            print("Message not printed for space reasons.")
-        else:
-            print("[Alice]  Decrypted:", repr(recovered)) 
-        #repr() function shows the string most accurately as it is written in code
-
-        assert recovered == message
-        print("\n✓ demo successful – plaintext recovered intact.")
-
-        print("\n====================================\n")
-        ''' FOR JSON FILES
-        decrypted_data = decrypt_json(key_string, cipher_string, nonce_string, tag_string)
-        formatted_data = json.dumps(decrypted_data, indent = 2)
-        print(f"Decrypted json contents: \n{formatted_data}")
-        '''
-
-
-# ----------------------------------------------------------------------
-if __name__ == "__main__":
-    main()
