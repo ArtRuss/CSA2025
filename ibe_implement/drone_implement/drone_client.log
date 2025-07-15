@@ -1,0 +1,8 @@
+INFO:__main__:[CONNECTED] to SAM server
+INFO:__main__:[CONNECTED] to KGA server
+INFO:__main__:[SENDING] request to KGA for SAM public key
+INFO:__main__:[DEBUG] Raw response from KGA:
+{"pub_id": {"x": 2811, "y": 2844}, "order": 13, "P": {"x": 3749, "y": 2844}, "Q_ID": {"x": 3238, "y": 8580}, "curve": {"q": 10177, "a": 0, "b": 1}}
+INFO:__main__:[CLOSING] KGA server
+INFO:__main__:[SIGNATURE VERIFIED] from SAM
+INFO:__main__:[PERMISSION GRANTED TO ENTER AIRSPACE]
