@@ -1,0 +1,95 @@
+class Stack():
+    def __init__(self, size):
+        self.max_size = size
+        self.occupied = 0
+        self.stack_list = []
+
+    def push(self, value):
+        #print(f"currently occupied: {self.occupied}\nmax size: {self.max_size}")
+        if self.occupied < self.max_size:
+            self.stack_list.append(value)
+            self.occupied += 1
+        else:
+            raise IndexError("No room to add to the stack!")
+    
+    def pop(self):
+        if not self.is_empty():
+            self.stack_list.remove(self.occupied)
+            self.occupied -= 1
+        else:
+            raise IndexError("Cannot remove from an empty stack!")
+
+    def peek(self):
+        if not self.is_empty():
+            return self.stack_list[self.occupied-1]
+        else:
+            raise IndexError("No peeking at an empty list!")
+
+    def get_size(self):
+        return self.occupied
+    
+    def is_empty(self):
+        return True if self.occupied == 0 else False
+
+class Queue():
+    def __init__(self, max_queue):
+        self.queue = []
+        self.in_queue = 0
+        self.max_queue = max_queue
+    
+    def dequeue(self):
+        if not self.is_empty():
+            self.queue.pop(self.in_queue - 1)
+            self.in_queue -= 1
+        else:
+            raise IndexError("Cannot remove from an empty queue")
+
+    def enqueue(self, value):
+        if self.in_queue < self.max_queue:
+            self.queue.insert(0, value)
+            self.in_queue += 1
+        else:
+            raise IndexError("Cannot add to a full queue!")
+
+    def is_empty(self):
+        return True if self.in_queue == 0 else False
+    
+    def __str__(self):
+        return ' '.join(str(value) for value in self.queue)
+
+def main():
+    '''
+    s = Stack(10)
+    s.push(5)
+    s.push(3)
+    s.push(9)
+    s.push(10)
+    s.push(34)
+    s.push(89)
+    print(s.peek())
+    s.push(23)
+    s.push(84)
+    s.push(25)
+    print(s.get_size())
+    '''
+    q = Queue(10)
+    q.enqueue(12)
+    q.enqueue(35)
+    q.enqueue(86)
+    q.enqueue(62)
+    q.enqueue(52)
+    print(q)
+    q.dequeue()
+    print(q)
+    q.dequeue()
+    print(q)
+    q.enqueue(100)
+    print(q)
+
+
+
+    
+
+
+if __name__ == "__main__":
+    main()
