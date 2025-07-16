@@ -26,16 +26,26 @@ class Stack:
             raise IndexError("no peeking on empty stack!")
         return self.top.value
 
+    def is_empty(self):
+        if self.top is None:
+            return True
+        return False
+
+    def get_size(self):
+        node = self.top
+        count = 1
+        while node.below is not None:
+            node = node.below
+            count += 1
+        return count
+
 if __name__ == "__main__":
     stack = Stack(5)
     stack.push(21)
-    stack.push(41)
     stack.push(3)
-    stack.pop()
-    stack.pop()
+    stack.push(41)
     stack.push(4)
+    print(stack.get_size())
+    stack.pop()
     print(stack.peek())
-    print(stack.pop())
-    print(stack.pop())
-    print(stack.peek())
-    print(stack.pop())
+
